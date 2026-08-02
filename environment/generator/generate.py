@@ -92,3 +92,14 @@ def voigt(x, gd_hwhm, gl_hwhm):
     sig = gd_hwhm / np.sqrt(2 * np.log(2))
     z = (x + 1j * gl_hwhm) / (sig * np.sqrt(2))
     return wofz(z).real / (sig * np.sqrt(2 * np.pi))
+
+
+def doppler_hwhm(nu, T, mass):
+    return 3.581e-7 * nu * np.sqrt(T / mass)
+
+
+def laser_true(det):
+    p = np.zeros_like(det)
+    for w, c, s in LASER:
+        p += w * np.exp(-0.5 * ((det - c) / s) ** 2) / (s * np.sqrt(2 * np.pi))
+    return p
