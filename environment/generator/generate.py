@@ -119,3 +119,27 @@ def absorbance(nu, n_tot, x_co, x_n2o, P_atm, T, l_fill, l_purge):
     if x_n2o:
         a = a + absorption(nu, n_tot, 0.0, x_n2o, P_atm, T) * l_fill
     return a
+
+
+def absorption(nu, n_tot, x_co, x_n2o, P_atm, T):
+    """Absorption coefficient k(nu), cm-1, for CO + the two N2O lines."""
+    k = x_co * n_tot * CO["S"] * voigt(nu - CO["nu"] - CO["delta"] * P_atm,
+                                       doppler_hwhm(CO["nu"], T, CO["mass"]),
+                                       CO["gamma"] * P_atm)
+    for ln in N2O:
+        k = k + x_n2o * n_tot * ln["S"] * voigt(nu - ln["nu"] - ln["delta"] * P_atm,
+                                                doppler_hwhm(ln["nu"], T, ln["mass"]),
+                                                ln["gamma"] * P_atm)
+    return k
+
+
+def detector_response(rates, weights, tp, tau):
+    """Single-pole (tau) response to sum_m w_m exp(-rate_m t'), t' >= 0."""
+    out = np.zeros(tp.shape)
+    pos = tp > 0
+    t = tp[pos]
+    a = 1.0 / tau
+    e_rate = np.exp(-np.outer(rates, t))                       # (m, n)
+    num = e_rate - np.exp(-a * t)[None, :]
+    out[pos] = (weights / (1.0 - rates * tau)) @ num
+    return out
