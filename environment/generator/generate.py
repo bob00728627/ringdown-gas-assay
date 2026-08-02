@@ -103,3 +103,19 @@ def laser_true(det):
     for w, c, s in LASER:
         p += w * np.exp(-0.5 * ((det - c) / s) ** 2) / (s * np.sqrt(2 * np.pi))
     return p
+
+
+def ripple(nu):
+    u = nu - CO["nu"]
+    return sum(a * np.sin(2 * np.pi * u / per + ph) for a, per, ph in RIPPLE)
+
+
+def absorbance(nu, n_tot, x_co, x_n2o, P_atm, T, l_fill, l_purge):
+    """Absorbance per pass: fill column (CO + N2O) plus the N2 purge columns, whose CO
+    impurity sits at the same pressure and temperature."""
+    v_co = voigt(nu - CO["nu"] - CO["delta"] * P_atm, doppler_hwhm(CO["nu"], T, CO["mass"]),
+                 CO["gamma"] * P_atm)
+    a = (x_co * l_fill + X_CO_IN_N2 * l_purge) * n_tot * CO["S"] * v_co
+    if x_n2o:
+        a = a + absorption(nu, n_tot, 0.0, x_n2o, P_atm, T) * l_fill
+    return a
