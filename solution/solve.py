@@ -77,3 +77,13 @@ def conv_grid(t, t0, tau, sfun):
     out = np.zeros_like(t)
     out[n0:] = yp
     return out
+
+
+def voigt(x, gd, gl):
+    sig = gd / np.sqrt(2 * np.log(2))
+    z = (x + 1j * gl) / (sig * np.sqrt(2))
+    return wofz(z).real / (sig * np.sqrt(2 * np.pi))
+
+
+def doppler_hwhm(nu, T, mass):
+    return 3.581e-7 * nu * np.sqrt(T / mass)
