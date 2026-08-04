@@ -87,3 +87,21 @@ def voigt(x, gd, gl):
 
 def doppler_hwhm(nu, T, mass):
     return 3.581e-7 * nu * np.sqrt(T / mass)
+
+
+def cum_fun(p):
+    if len(p) == 3:
+        g1, g2, g3 = p
+        return lambda x: np.exp(-g1 * x + 0.5 * g2 * x ** 2 - g3 * x ** 3 / 6.0)
+    if len(p) == 2:
+        g1, g2 = p
+        return lambda x: np.exp(-g1 * x + 0.5 * g2 * x ** 2)
+    return lambda x: np.exp(-p[0] * x)
+
+
+# ----------------------------------------------------------------------------------
+# S0 / S1
+# ----------------------------------------------------------------------------------
+def clean_records(t, y):
+    pre = (t < -0.02)
+    return y - y[:, pre].mean(axis=1, keepdims=True)
